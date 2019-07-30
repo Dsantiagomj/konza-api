@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index",
     "dev": "nodemon --inspect",
+    "lint": "eslint ./**/*.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -15,7 +16,11 @@
   ],
   "author": "Daniel Santiago Muñoz Jaramillo",
   "license": "MIT",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.2",
     "nodemon": "^1.19.1"
   }
 }
