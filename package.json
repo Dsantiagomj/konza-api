@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
+    "dev": "nodemon --inspect",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -13,5 +14,8 @@
     "management"
   ],
   "author": "Daniel Santiago Muñoz Jaramillo",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "nodemon": "^1.19.1"
+  }
 }

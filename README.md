@@ -6,10 +6,14 @@ This is an API for manage simple tasks
 
 ## Instalation
 
-`git clone https://github.com/dsantiagomj/konza-api`
+1. `git clone https://github.com/dsantiagomj/konza-api`
 
-`cd konza-api`
+2. `cd konza-api`
 
-`npm i`
+3. `npm i`
 
-`npm start`
+4. `npm start`
+
+## Development
+
+`npm run dev`
