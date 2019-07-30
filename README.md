@@ -14,6 +14,8 @@ This is an API for manage simple tasks
 
 4. `npm start`
 
+5. `cp .env.example .env`
+
 ## Development
 
 `npm run dev`
