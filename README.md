@@ -23,3 +23,4 @@ This is an API for manage simple tasks
 ### Development packages
 
 - nodemon
+- eslint
