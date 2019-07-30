@@ -17,3 +17,9 @@ This is an API for manage simple tasks
 ## Development
 
 `npm run dev`
+
+## Packages
+
+### Development packages
+
+- nodemon
