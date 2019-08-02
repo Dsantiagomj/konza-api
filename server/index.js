@@ -1,13 +1,24 @@
 const express = require('express');
 const requestId = require('express-request-id')();
+const bodyParser = require('body-parser');
 
 const logger = require('./config/logger');
 const api = require('./api/v1');
 
 const app = express();
 
-// Setup Middleware
+// Setup Middlewares
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+// Request Id
 app.use(requestId);
+
+// Log request
 app.use(logger.requests);
 
 app.use('/api/v1', api);
