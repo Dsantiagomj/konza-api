@@ -1,213 +1,91 @@
-const uuidv1 = require('uuid/v1');
+const HTTP_STATUS = require('http-status-codes');
 
-const tasks = [
-  {
-    _id: uuidv1(),
-    title: 'Buy Milk',
-    description: 'For breakfast',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-  {
-    _id: uuidv1(),
-    title: 'Buy Meat',
-    description: 'For lunch',
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
-  },
-];
+const Model = require('./model');
+
+exports.id = (req, res, next, id) => {
+  Model.findById(id, (err, doc) => {
+    if (err) {
+      next(err);
+    } else if (doc) {
+      req.doc = doc;
+      next();
+    } else {
+      next({
+        statusCode: HTTP_STATUS.NOT_FOUND,
+        message: 'Resource not found',
+      });
+    }
+  });
+};
 
 exports.create = (req, res, next) => {
   const { body = {} } = req;
-  console.log(body);
-  const { title = '', description = '' } = body;
-  tasks.push({
-    _id: uuidv1(),
-    title,
-    description,
-    created: new Date().toISOString(),
-    updated: new Date().toISOString(),
+
+  Model.create(body, (err, doc) => {
+    if (err) {
+      next(err);
+    } else {
+      res.status(HTTP_STATUS.CREATED);
+      res.json({
+        data: doc,
+        success: true,
+        statusCode: HTTP_STATUS.CREATED,
+      });
+    }
   });
-  res.json(tasks);
 };
 
 exports.all = (req, res, next) => {
-  const { query } = req;
-  const {
-    limit = 10, skip = 0, sortBy = 'created', direction = 'desc',
-  } = query;
-  const sortOrder = direction === 'desc' ? -1 : 1;
-  const tasksClone = new Array(...tasks);
-  const sortedTasks = tasksClone.sort((a, b) => {
-    if (a[sortBy] > b[sortBy]) {
-      return 1 * sortOrder;
+  Model.find({}, (err, docs) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json({
+        data: docs,
+        success: true,
+        statusCode: HTTP_STATUS.OK,
+      });
     }
-    if (a[sortBy] < b[sortBy]) {
-      return -1 * sortOrder;
-    }
-    return 0;
   });
-
-  const tasksLimited = sortedTasks.slice(Number(skip), Number(limit) + Number(skip));
-
-  return res.json(tasksLimited);
 };
 
 exports.read = (req, res, next) => {
-  const { params = {} } = req;
-  const { id = 1 } = params;
-
-  const selectedTask = tasks.find(task => task._id === id) || {};
-
-  res.json(selectedTask);
+  const { doc = {} } = req;
+  res.json({
+    data: doc,
+    success: true,
+    statusCode: HTTP_STATUS.OK,
+  });
 };
 
 exports.update = (req, res, next) => {
-  const { body = {}, params } = req;
-  const { title = '', description = '' } = body;
-  const { id = 1 } = params;
+  const { body = {}, doc = {} } = req;
+  Object.assign(doc, body);
 
-  const updateTask = tasks.find(task => task._id === id);
-  const newTask = {
-    title,
-    description,
-    updated: new Date().toISOString(),
-  };
-  Object.assign(updateTask, newTask);
-  res.json(tasks);
+  doc.save((err, document) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json({
+        data: document,
+        success: true,
+        statusCode: HTTP_STATUS.OK,
+      });
+    }
+  });
 };
 
 exports.delete = (req, res, next) => {
-  const { params = {} } = req;
-  const { id = 1 } = params;
-  const deleteTask = tasks.find(task => task._id === id) || {};
-  const deleteTaskIndex = tasks.indexOf(deleteTask);
-  tasks.splice(deleteTaskIndex, 1);
-  res.json(deleteTask);
+  const { doc = {} } = req;
+  doc.remove((err, document) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json({
+        data: document,
+        success: true,
+        statusCode: HTTP_STATUS.OK,
+      });
+    }
+  });
 };

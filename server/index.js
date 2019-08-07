@@ -1,13 +1,14 @@
 const express = require('express');
 const requestId = require('express-request-id')();
 const bodyParser = require('body-parser');
+const HTTP_STATUS = require('http-status-codes');
 
 const logger = require('./config/logger');
 const api = require('./api/v1');
 
 const app = express();
 
-// Setup Middlewares
+// Setup Middleware
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -18,7 +19,7 @@ app.use(bodyParser.json());
 // Request Id
 app.use(requestId);
 
-// Log request
+// Log requests
 app.use(logger.requests);
 
 app.use('/api/v1', api);
@@ -28,7 +29,7 @@ app.use('/api', api);
 
 app.use((req, res, next) => {
   const message = 'Route not found';
-  const statusCode = 404;
+  const statusCode = HTTP_STATUS.NOT_FOUND;
 
   next({
     message,
@@ -40,8 +41,14 @@ app.use((req, res, next) => {
 // Error middleware
 
 app.use((err, req, res, next) => {
-  const { message, statusCode = 500, level = 'error' } = err;
+  const { message, level = 'error', name } = err;
+  let { statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR } = err;
   const logMessage = `${logger.header(req)} ${statusCode} ${message}`;
+
+  // Validation Errors
+  if (name === 'ValidationError') {
+    statusCode = HTTP_STATUS.UNPROCESSABLE_ENTITY;
+  }
 
   logger[level](logMessage);
 
