@@ -1,11 +1,26 @@
 const HTTP_STATUS_CODE = require('http-status-codes');
 
-const { Model, fields } = require('./model');
-const { paginationParseParams, sortParseParams } = require('./../../../utils');
+const { Model, fields, references } = require('./model');
+const { paginationParseParams } = require('./../../../utils');
+const { sortParseParams, sortCompactToStr } = require('./../../../utils');
+
+/*
+ * Obtenemos un Array con los nombres de las llaves
+ * de las referencias
+ */
+const referencesNames = Object.getOwnPropertyNames(references);
 
 exports.id = async (req, res, next, id) => {
   try {
-    const doc = await Model.findById(id).exec();
+    /*
+     * Creamos una cadena con los nombres de las
+     * referencias separadas por espacio pues asi
+     * lo requiere el metodo populate
+     */
+    const populate = referencesNames.join(' ');
+    const doc = await Model.findById(id)
+      .populate(populate)
+      .exec();
     if (doc) {
       req.doc = doc;
       next();
@@ -41,14 +56,15 @@ exports.all = async (req, res, next) => {
   const { query = {} } = req;
   const { limit, page, skip } = paginationParseParams(query);
   const { sortBy, direction } = sortParseParams(query, fields);
-  const sort = {};
-  sort[sortBy] = direction;
+  const sort = sortCompactToStr(sortBy, direction);
+  const populate = referencesNames.join(' ');
 
   try {
     const all = Model.find()
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .populate(populate)
       .exec();
     const count = Model.countDocuments();
 
