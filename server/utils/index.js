@@ -25,7 +25,30 @@ const sortParseParams = (
   };
 };
 
+const sortCompactToStr = (sortBy, direction) => {
+  const dir = direction === 'desc' ? '-' : '';
+  return `${dir}${sortBy}`;
+};
+
+// params = { userId: 'assafasfafs' }
+// paramsNames = ['userId']
+// referencesNames ['userId', 'projectId']
+
+// filters: { userId: 'assafasfafs' }
+// populate: ['projectId']
+
+const filterByNested = (params, referencesNames) => {
+  const paramsNames = Object.getOwnPropertyNames(params);
+  const populateNames = referencesNames.filter(item => !paramsNames.includes(item));
+  return {
+    filters: params,
+    populate: populateNames.join(' '),
+  };
+};
+
 module.exports = {
   paginationParseParams,
   sortParseParams,
+  sortCompactToStr,
+  filterByNested,
 };
