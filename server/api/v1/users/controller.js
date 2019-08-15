@@ -20,7 +20,7 @@ exports.id = async (req, res, next, id) => {
   }
 };
 
-exports.create = async (req, res, next) => {
+exports.signup = async (req, res, next) => {
   const { body = {} } = req;
 
   try {
@@ -32,6 +32,36 @@ exports.create = async (req, res, next) => {
       success: true,
       statusCode: HTTP_STATUS_CODE.CREATED,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.signin = async (req, res, next) => {
+  const { body = {} } = req;
+  const { email = '', password = '' } = body;
+
+  try {
+    // Obtener el usuario
+    const user = await Model.findOne({
+      email,
+    });
+    // verificar si el usuario existe
+    // Comparar la contraseña
+    const verify = user.verifyPassword(password);
+    if (user && verify) {
+      // Devolver el usuario
+      res.json({
+        data: user,
+        success: true,
+        statusCode: HTTP_STATUS_CODE.OK,
+      });
+    } else {
+      next({
+        statusCode: HTTP_STATUS_CODE.UNAUTHORIZED,
+        message: 'Invalid Email / Password',
+      });
+    }
   } catch (err) {
     next(err);
   }

@@ -81,8 +81,9 @@ user.pre('save', async function save(next) {
 });
 
 // prettier-ignore
-user.methods.verifyPassword = function verifyPassword(password) {
-  return compare(password, this.password);
+user.methods.verifyPassword = async function verifyPassword(password) {
+  const result = compare(password, this.password);
+  return result;
 };
 
 module.exports = {
