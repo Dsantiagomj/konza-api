@@ -1,7 +1,10 @@
 const HTTP_STATUS_CODE = require('http-status-codes');
 
 const { Model, fields } = require('./model');
-const { paginationParseParams, sortParseParams } = require('../../../utils');
+const { paginationParseParams } = require('./../../../utils');
+const { sortParseParams, sortCompactToStr } = require('./../../../utils');
+
+const { signToken } = require('./../auth');
 
 exports.id = async (req, res, next, id) => {
   try {
@@ -25,12 +28,18 @@ exports.signup = async (req, res, next) => {
 
   try {
     const doc = await Model.create(body);
+    // Generar token
+    const { id } = doc;
+    const token = signToken({ id });
 
     res.status(HTTP_STATUS_CODE.CREATED);
     res.json({
       data: doc,
       success: true,
       statusCode: HTTP_STATUS_CODE.CREATED,
+      meta: {
+        token,
+      },
     });
   } catch (err) {
     next(err);
@@ -40,26 +49,30 @@ exports.signup = async (req, res, next) => {
 exports.signin = async (req, res, next) => {
   const { body = {} } = req;
   const { email = '', password = '' } = body;
-
   try {
-    // Obtener el usuario
-    const user = await Model.findOne({
-      email,
-    });
-    // verificar si el usuario existe
+    // Obtener el usuario basado en el email
+    const user = await Model.findOne({ email });
+    const verified = await user.verifyPassword(password);
+    // Verificar si existe
     // Comparar la contraseña
-    const verify = user.verifyPassword(password);
-    if (user && verify) {
+    if (user && verified) {
+      // Generar token
+      const { id } = user;
+      const token = signToken({ id });
       // Devolver el usuario
       res.json({
         data: user,
         success: true,
         statusCode: HTTP_STATUS_CODE.OK,
+        meta: {
+          token,
+        },
       });
     } else {
       next({
+        success: false,
         statusCode: HTTP_STATUS_CODE.UNAUTHORIZED,
-        message: 'Invalid Email / Password',
+        message: 'Invalid Email or Password',
       });
     }
   } catch (err) {
@@ -71,8 +84,7 @@ exports.all = async (req, res, next) => {
   const { query = {} } = req;
   const { limit, page, skip } = paginationParseParams(query);
   const { sortBy, direction } = sortParseParams(query, fields);
-  const sort = {};
-  sort[sortBy] = direction;
+  const sort = sortCompactToStr(sortBy, direction);
 
   try {
     const all = Model.find()
