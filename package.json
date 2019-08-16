@@ -36,6 +36,7 @@
     "morgan": "^1.9.1",
     "strip-final-newline": "^2.0.0",
     "uuid": "^3.3.2",
+    "validator": "^11.1.0",
     "winston": "^3.2.1"
   }
 }
