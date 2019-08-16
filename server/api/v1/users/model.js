@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { hash, compare } = require('bcryptjs');
+const { isEmail, isURL } = require('validator');
+const { body } = require('express-validator');
 
 const { Schema } = mongoose;
 
@@ -21,16 +23,33 @@ const fields = {
     required: true,
     trim: true,
     unique: true,
+    validate: {
+      validator(value) {
+        return isEmail(value);
+      },
+      message(props) {
+        return `${props.value} is not a valid Email`;
+      },
+    },
   },
   password: {
     type: String,
     required: true,
     trim: true,
+    min: 6,
   },
   profilePhoto: {
     type: String,
     trim: true,
-    default: '',
+    required: true,
+    validate: {
+      validator(value) {
+        return isURL(value);
+      },
+      message(props) {
+        return `${props.value} is not a URL`;
+      },
+    },
   },
 };
 
@@ -81,12 +100,14 @@ user.pre('save', async function save(next) {
 });
 
 // prettier-ignore
-user.methods.verifyPassword = async function verifyPassword(password) {
-  const result = compare(password, this.password);
-  return result;
+user.methods.verifyPassword = function verifyPassword(password) {
+  return compare(password, this.password);
 };
+
+const sanitizers = [body('firstname').escape(), body('lastname').escape()];
 
 module.exports = {
   Model: mongoose.model('user', user),
   fields,
+  sanitizers,
 };

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { body } = require('express-validator');
 
 const { Schema } = mongoose;
 
@@ -25,6 +26,12 @@ const references = {
   },
 };
 
+/*
+ * En la configuracion del Schema indicamos que
+ * cada vez que vayamos a dar una respuesta en
+ * formato JSON incluya los campos virtuales
+ */
+
 const project = new Schema(
   {
     ...fields,
@@ -37,6 +44,13 @@ const project = new Schema(
     },
   },
 );
+
+/*
+ * Creamos un objeto virtuals que va a tener
+ * todos los campos virtuales donde se referencia
+ * el modelo, la llave local y la llave foranea
+ * que se utilizara para hacer populate de este campo
+ */
 
 const virtuals = {
   tasks: {
@@ -52,9 +66,12 @@ const virtuals = {
 
 project.virtual('tasks', virtuals.tasks);
 
+const sanitizers = [body('title').escape(), body('description').escape()];
+
 module.exports = {
   Model: mongoose.model('project', project),
   fields,
   references,
   virtuals,
+  sanitizers,
 };
